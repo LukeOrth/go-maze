@@ -21,27 +21,27 @@ type Maze struct {
 }
 
 func main() {
-    maze := InitMaze(5, 5, 1)
+    maze := InitMaze(5, 3, 1)
     fmt.Println(maze)
 }
 
 func InitMaze(cols int, rows int, cellSize int) *Maze {
     maze := &Maze{ Cells: make([]*Cell, cols * rows), CellSize: cellSize, Cols: cols, Rows: rows  }
-   
-    for x := 0; x < cols; x++ {
-        for y := 0; y < cols; y++ {
-            var cell Cell
-            cell = *maze.Cells[0]
-            fmt.Println(cell)
-            cell.X = x
-            cell.Y = y
-            cell.Top = true
-            cell.Right = true
-            cell.Bottom = true
-            cell.Left = true
-            cell.Visited = false
-            cell.Current = false
+
+    for y := 0; y < rows; y++ {
+        for x := 0; x < cols; x++ {
+            maze.Cells[cols * y + x] = &Cell{ X: x, Y: y, Top: true, Right: true, Bottom: true, Left: true, Visited: false, Current: false }
         }
     }
     return maze
 }
+
+func cellAt(maze *Maze, x int, y int) *Cell {
+    return maze.Cells[maze.Cols * y + x]
+}
+
+/*
+func MazeToSvg(maze *Maze) {
+
+}
+*/
