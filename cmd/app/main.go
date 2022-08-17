@@ -40,6 +40,28 @@ func cellAt(maze *Maze, x int, y int) *Cell {
     return maze.Cells[maze.Cols * y + x]
 }
 
+func removeWall(cell *Cell, neighbor *Cell) {
+    xDelta := cell.X - neighbor.X
+    yDelta := cell.Y - neighbor.Y
+
+    // X
+    if xDelta == 1 {
+        cell.Left = false
+        neighbor.Right = false
+    } else if xDelta == -1 {
+        cell.Right = false
+        neighbor.Left = false
+    }
+    // Y
+    if yDelta == 1 {
+        cell.Top = false
+        neighbor.Bottom = false
+    } else if yDelta == -1 {
+        cell.Bottom = false
+        neighbor.Top = false
+    }
+}
+
 /*
 func MazeToSvg(maze *Maze) {
 
