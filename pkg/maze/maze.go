@@ -83,9 +83,16 @@ func (m *Maze) MazeToSvg() {
     canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
 
     for _, c := range m.cells {
-        if c != nil && m != nil {
-            c.DrawBorder(canvas, m.cellSize) 
-        }
+        c.DrawBorder(canvas, m.cellSize) 
     }
     canvas.End()
+}
+
+func (m *Maze) Print() {
+    for i, c := range m.cells {
+        if i % m.cols == 0 {
+            fmt.Println()
+        }
+        fmt.Printf("%d ", c.border)
+    }
 }

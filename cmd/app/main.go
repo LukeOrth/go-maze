@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-    maze := maze.NewMaze(5000, 5000, 50)
-    maze.MazeToSvg()
+    maze := maze.NewMaze(1000, 1000, 50)
+    maze.Print()
 }
