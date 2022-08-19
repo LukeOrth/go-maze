@@ -25,8 +25,7 @@ func NewMaze(cols int, rows int, cellSize int) *Maze {
         }
     }
 
-    maze.cellAt(0, 0).visited = true
-    maze.checkNeighbors(maze.cellAt(0, 0), 0, NewStack())
+    maze.checkNeighbors(0, 0, 0, NewStack())
 
     return maze
 }
@@ -38,9 +37,8 @@ func (m *Maze) cellAt(x int, y int) *Cell {
     return m.cells[m.cols * y + x]
 }
 
-func (m *Maze) checkNeighbors(c *Cell, count int, seen *Stack) *Cell {
-    x := c.x
-    y := c.y
+func (m *Maze) checkNeighbors(x int, y int, count int, seen *Stack) *Cell {
+    c := m.cellAt(x, y)
     c.current = false
 
     neighbors := []*Cell{ 
@@ -56,44 +54,38 @@ func (m *Maze) checkNeighbors(c *Cell, count int, seen *Stack) *Cell {
     for i := range neighbors {
         randNeighbor := neighbors[(random + i) % 4]
         if randNeighbor != nil && !randNeighbor.visited {
-            seen.Push(c)
-
             randNeighbor.visited = true
             randNeighbor.current = true
            
-            fmt.Printf("count: %d\n", count)
-            fmt.Printf("cur X: %d Y: %d\n", c.x, c.y)
-            fmt.Printf("nex X: %d Y: %d\n", randNeighbor.x, randNeighbor.y)
             c.removeWall(randNeighbor)
-            m.MazeToSvg(count)
-            m.checkNeighbors(randNeighbor, count + 1, seen)
+            seen.Push(c)
+            m.checkNeighbors(randNeighbor.x, randNeighbor.y, count + 1, seen)
             return randNeighbor
         }
     }
 
-    c, err := seen.Pop()
-    if err != nil {
-        return nil
+    if len(seen.cell) > 0 {
+        c, _ := seen.Pop()
+        c.current = true
+        m.checkNeighbors(c.x, c.y, count + 1, seen)
     }
-
-    c.current = true
-    m.MazeToSvg(count)
-    m.checkNeighbors(c, count + 1, seen)
 
     return nil
 }
 
-func (m *Maze) MazeToSvg(count int) {
+func (m *Maze) MazeToSvg() {
     width := m.cols * m.cellSize
     height := m.rows * m.cellSize
 
-    out, _ := os.Create(fmt.Sprintf("test_%d.svg", count))
+    out, _ := os.Create(fmt.Sprintf("test.svg"))
     canvas := svg.New(out)
     canvas.Start(width, height)
     canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
 
     for _, c := range m.cells {
-        c.DrawBorder(canvas, m.cellSize)
+        if c != nil && m != nil {
+            c.DrawBorder(canvas, m.cellSize) 
+        }
     }
     canvas.End()
 }
