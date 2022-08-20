@@ -1,7 +1,7 @@
 package maze
 
 import (
-	"fmt"
+    "log"
 	"math/rand"
 	"os"
 	"time"
@@ -74,11 +74,18 @@ func (m *Maze) checkNeighbors(x int, y int, count int, seen *Stack) *Cell {
 }
 
 func (m *Maze) MazeToSvg() {
+    // file operations
+    fname := "maze.svg"
+    outf, err := os.Create(fname)
+    if err != nil {
+        log.Panicf("ERROR: unable to create '%s' file\n", fname)
+    }
+    defer outf.Close()
+    
     width := m.cols * m.cellSize
     height := m.rows * m.cellSize
 
-    out, _ := os.Create(fmt.Sprintf("test.svg"))
-    canvas := svg.New(out)
+    canvas := svg.New(outf)
     canvas.Start(width, height)
     canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
 
@@ -88,11 +95,22 @@ func (m *Maze) MazeToSvg() {
     canvas.End()
 }
 
+/*
 func (m *Maze) Print() {
-    for i, c := range m.cells {
-        if i % m.cols == 0 {
-            fmt.Println()
+    // file operations
+    fname := "output.log"
+    outf, err := os.Create(fname)
+    if err != nil {
+        log.Panicf("ERROR: unable to creat the '%s' file\n", fname)
+    }
+    defer outf.Close()
+
+    for _, c := range m.cells {
+        err := os.WriteFile(outf, []byte(c.border), 0600)
+        err := binary.Write(outf, binary.LittleEndian, c.border)
+        if err != nil {
+            log.Panicf("ERROR: could not write data to '%s' file\n", fname)
         }
-        fmt.Printf("%d ", c.border)
     }
 }
+*/
