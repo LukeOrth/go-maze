@@ -1,23 +1,20 @@
 package maze
 
 import (
-	"fmt"
-	"strings"
+	"encoding/json"
 )
 
-type JSONableSlice []uint8
-
-func (u JSONableSlice) MarshalJSON() ([]byte, error) {
-	var result string
-	if u == nil {
-		result = "null"
-	} else {
-		result = strings.Join(strings.Fields(fmt.Sprintf("%d", u)), ",")
-	}
-	return []byte(result), nil
+func (m Maze) MarshalJSON() ([]byte, error) {
+    return json.Marshal(map[string]interface{}{
+        "cells":    m.cells,
+        "scale":    m.scale,
+        "columns":  m.cols,
+        "rows":     m.rows,
+    })
 }
 
-type Test struct {
-	Name  string
-	Array JSONableSlice
+func (c Cell) MarshalJSON() ([]byte, error) {
+    return json.Marshal(map[string]interface{}{
+        "border":   c.border,
+    })
 }

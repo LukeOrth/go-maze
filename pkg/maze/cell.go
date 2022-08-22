@@ -1,6 +1,8 @@
 package maze
 
-import "github.com/ajstarks/svgo"
+import (
+	"github.com/ajstarks/svgo"
+)
 
 type Cell struct {
     x       int
@@ -8,6 +10,21 @@ type Cell struct {
     border  uint8
     visited bool
     current bool
+}
+
+func (c *Cell) direction(n *Cell) uint8 {
+    xDelta := c.x - n.x
+    yDelta := c.y - n.y
+
+    if xDelta == 1 {            // left
+        return 1
+    } else if xDelta == -1 {    // right
+        return 4
+    } else if yDelta == 1 {     // top
+        return 8
+    } else {                    // down
+        return 2
+    }
 }
 
 func (c *Cell) removeWall(n *Cell) {
