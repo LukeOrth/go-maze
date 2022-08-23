@@ -19,6 +19,22 @@ type Maze struct {
     scale   int
 }
 
+type moves []uint8
+
+func (m Maze) MarshalJSON() ([]byte, error) {
+    return json.Marshal(map[string]interface{}{
+        "cells":    m.cells,
+        "columns":  m.cols,
+        "rows":     m.rows,
+        "moves":    m.moves,
+        "scale":    m.scale,
+    })
+}
+
+func (u moves) MarshalJSON() ([]byte, error) {
+    return json.Marshal(u)
+}
+
 func NewMaze(cols int, rows int, scale int) *Maze {
     maze := &Maze{ 
         cells: make([]*Cell, cols * rows), 
