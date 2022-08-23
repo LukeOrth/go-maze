@@ -15,7 +15,7 @@ type Maze struct {
     cells   []*Cell
     cols    int
     rows    int
-    path    []uint8
+    moves   []uint
     scale   int
 }
 
@@ -24,7 +24,7 @@ func NewMaze(cols int, rows int, scale int) *Maze {
         cells: make([]*Cell, cols * rows), 
         cols: cols, 
         rows: rows, 
-        path: make([]uint8, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
+        moves: make([]uint, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
         scale: scale, 
     }
 
@@ -100,7 +100,8 @@ func (m *Maze) checkNeighbors(x int, y int, count int, seen *Stack) *Cell {
         if randNeighbor != nil && !randNeighbor.visited {
             randNeighbor.visited = true
             randNeighbor.current = true
-           
+          
+            m.moves = append(m.moves, c.direction(randNeighbor))
             c.removeWall(randNeighbor)
             seen.Push(c)
             m.checkNeighbors(randNeighbor.x, randNeighbor.y, count + 1, seen)
@@ -109,9 +110,10 @@ func (m *Maze) checkNeighbors(x int, y int, count int, seen *Stack) *Cell {
     }
 
     if len(seen.cell) > 0 {
-        c, _ := seen.Pop()
-        c.current = true
-        m.checkNeighbors(c.x, c.y, count + 1, seen)
+        n, _ := seen.Pop()
+        m.moves = append(m.moves, c.direction(n))
+        n.current = true
+        m.checkNeighbors(n.x, n.y, count + 1, seen)
     }
 
     return nil

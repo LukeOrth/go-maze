@@ -12,41 +12,22 @@ type Cell struct {
     current bool
 }
 
-func (c *Cell) direction(n *Cell) uint8 {
-    xDelta := c.x - n.x
-    yDelta := c.y - n.y
-
-    if xDelta == 1 {            // left
+func (c *Cell) direction(n *Cell) uint {
+    if c.x > n.x {          // left
         return 1
-    } else if xDelta == -1 {    // right
+    } else if c.x < n.x {   // right
         return 4
-    } else if yDelta == 1 {     // top
+    } else if c.y > n.y {   // top
         return 8
-    } else {                    // down
+    } else {                // down
         return 2
     }
 }
 
 func (c *Cell) removeWall(n *Cell) {
-    xDelta := c.x - n.x
-    yDelta := c.y - n.y
-
-    // X
-    if xDelta == 1 {
-        c.border = c.border & 14
-        n.border = n.border & 11
-    } else if xDelta == -1 {
-        c.border = c.border & 11
-        n.border = n.border & 14
-    }
-    // Y
-    if yDelta == 1 {
-        c.border = c.border & 7
-        n.border = n.border & 13
-    } else if yDelta == -1 {
-        c.border = c.border & 13
-        n.border = n.border & 7
-    }
+    dir := uint8(c.direction(n))
+    c.border = c.border & ^dir
+    n.border = n.border & ^(dir >> 2 | dir << 2)
 }
 
 
