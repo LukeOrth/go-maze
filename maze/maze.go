@@ -2,13 +2,13 @@ package maze
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"math"
 	"math/rand"
-	"os"
 	"time"
-
-	"github.com/ajstarks/svgo"
+    
+    "github.com/ajstarks/svgo"
 )
 
 type Maze struct {
@@ -41,7 +41,7 @@ func NewMaze(cols int, rows int, scale int) *Maze {
         cols: cols, 
         rows: rows, 
         moves: make([]uint, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
-        scale: scale, 
+        scale: scale + 1, 
     }
 
     for y := 0; y < rows; y++ {
@@ -55,6 +55,8 @@ func NewMaze(cols int, rows int, scale int) *Maze {
             }
         }
     }
+    maze.cellAt(0, 0).border = uint8(7)
+    maze.cellAt(cols - 1, rows - 1).border = uint8(13)
 
     // start at cell(0, 0)
     maze.checkNeighbors(0, 0, 0, NewStack())
@@ -62,15 +64,13 @@ func NewMaze(cols int, rows int, scale int) *Maze {
     return maze
 }
 
-func (m *Maze) Svg() {
+func (m *Maze) Svg(w io.Writer) {
     width := m.cols * m.scale
     height := m.rows * m.scale
 
-    canvas := svg.New(os.Stdout)
+    canvas := svg.New(w)
     canvas.Start(width, height)
     canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
-    canvas.Square(0, 0, m.scale, canvas.RGB(0, 255, 0))
-    canvas.Square(width - m.scale, height - m.scale, m.scale, canvas.RGB(255, 0, 0))
 
     for _, c := range m.cells {
         c.DrawBorder(canvas, m.scale) 

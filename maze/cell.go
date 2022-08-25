@@ -1,7 +1,10 @@
 package maze
 
 import (
-    "encoding/json"
+	"encoding/json"
+	"fmt"
+	"math"
+
 	"github.com/ajstarks/svgo"
 )
 
@@ -19,7 +22,7 @@ func (c Cell) MarshalJSON() ([]byte, error) {
 
 func (c *Cell) DrawBorder(canvas *svg.SVG, scale int) {
     x1, y1, x2, y2 := c.x * scale, c.y * scale, c.x * scale + scale, c.y * scale + scale
-    s := "stroke:black;fill:none;"
+    s := fmt.Sprintf("stroke:black;stroke-width:%f;fill:none;", math.Ceil(float64(scale) / 4))
 
     borders := map[uint8]func() {
         1: func() {canvas.Line(x1, y1, x1, y2, s)},
