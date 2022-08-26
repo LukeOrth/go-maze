@@ -20,6 +20,13 @@ func generateMazeGET(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(maze)
 }
 
+func mazeToPngPOST(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var maze maze.Maze
+	_ = json.NewDecoder(r.Body).Decode(&maze)
+    maze.Png(w)
+}
+
 func mazeToSvg(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "image/svg")
     q := r.URL.Query()

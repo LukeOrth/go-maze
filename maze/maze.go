@@ -2,6 +2,7 @@ package maze
 
 import (
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -19,7 +20,7 @@ type Maze struct {
     cells   []*Cell
     cols    int
     rows    int
-    moves   moves
+    moves   []uint
     scale   int
 }
 
@@ -56,6 +57,7 @@ func (m *Maze) Svg(w io.Writer) {
 }
 
 func (m *Maze) Json() []byte {
+    fmt.Println("made it here!")
     data, err := json.Marshal(m)
     if err != nil {
         log.Panicln("ERROR: unable to marshal JSON")
