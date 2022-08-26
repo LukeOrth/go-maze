@@ -2,24 +2,66 @@ package maze
 
 import (
 	"encoding/json"
+	"image"
+	"image/png"
 	"io"
 	"log"
 	"math"
 	"math/rand"
 	"time"
-    
-    "github.com/ajstarks/svgo"
+
+	"github.com/ajstarks/svgo"
 )
+
+type moves []uint
 
 type Maze struct {
     cells   []*Cell
     cols    int
     rows    int
-    moves   []uint
+    moves   moves
     scale   int
 }
 
-type moves []uint8
+func NewMaze(cols int, rows int, scale int) *Maze {
+    maze := initMaze(cols, rows, scale)
+    maze.generateMaze(0, 0, NewStack())
+
+    return maze
+}
+
+func (m *Maze) Png(w io.Writer) {
+    width := m.cols * (2 * m.scale) + m.scale
+    height := m.rows * (2 * m.scale) + m.scale
+
+    img := image.NewRGBA(image.Rect(0, 0, width, height))
+    for _, c := range m.cells {
+        c.DrawPNG(img, m.scale)
+    }
+    png.Encode(w, img)
+}
+
+func (m *Maze) Svg(w io.Writer) {
+    width := m.cols * (m.scale + 1)
+    height := m.rows * (m.scale + 1)
+
+    canvas := svg.New(w)
+    canvas.Start(width, height)
+    canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
+
+    for _, c := range m.cells {
+        c.DrawSVG(canvas, m.scale) 
+    }
+    canvas.End()
+}
+
+func (m *Maze) Json() []byte {
+    data, err := json.Marshal(m)
+    if err != nil {
+        log.Panicln("ERROR: unable to marshal JSON")
+    }
+    return data
+}
 
 func (m Maze) MarshalJSON() ([]byte, error) {
     return json.Marshal(map[string]interface{}{
@@ -35,15 +77,17 @@ func (u moves) MarshalJSON() ([]byte, error) {
     return json.Marshal(u)
 }
 
-func NewMaze(cols int, rows int, scale int) *Maze {
+func initMaze(cols int, rows int, scale int) *Maze {
+    // instantiate maze
     maze := &Maze{ 
         cells: make([]*Cell, cols * rows), 
         cols: cols, 
         rows: rows, 
         moves: make([]uint, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
-        scale: scale + 1, 
+        scale: scale,
     }
 
+    // initalize cells
     for y := 0; y < rows; y++ {
         for x := 0; x < cols; x++ {
             maze.cells[cols * y + x] = &Cell{
@@ -55,82 +99,70 @@ func NewMaze(cols int, rows int, scale int) *Maze {
             }
         }
     }
-    maze.cellAt(0, 0).border = uint8(7)
-    maze.cellAt(cols - 1, rows - 1).border = uint8(13)
 
-    // start at cell(0, 0)
-    maze.checkNeighbors(0, 0, 0, NewStack())
+    // make entrance at top left cell
+    maze.cellAt(0, 0).border = uint8(7)
+    // make bottom right cell the exit
+    maze.cellAt(cols - 1, rows - 1).border = uint8(13)
 
     return maze
 }
 
-func (m *Maze) Svg(w io.Writer) {
-    width := m.cols * m.scale
-    height := m.rows * m.scale
+func (m *Maze) generateMaze(x int, y int, seen *Stack) {
+    // mark initial cell as visited and push to stack
+    c := m.cellAt(x, y)
+    c.visited = true
+    seen.Push(c)
 
-    canvas := svg.New(w)
-    canvas.Start(width, height)
-    canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
+    // while stack is not empty
+    for len(seen.cell) > 0 {
+        // pop cell from stack
+        c, _ := seen.Pop()
+        c = m.cellAt(c.x, c.y)
 
-    for _, c := range m.cells {
-        c.DrawBorder(canvas, m.scale) 
+        // get any unvisited neighbors
+        neighbors := m.unvisitedNeighbors(c)
+        if len(neighbors) > 0 {
+            // push cell to stack
+            seen.Push(c)
+            // get random unvisited neighbor
+            rand.Seed(time.Now().UnixNano())
+            random := rand.Intn(len(neighbors))
+            randNeighbor := neighbors[(random) % len(neighbors)]
+            // remove wall between cells
+            c.removeWall(randNeighbor)
+            // mark neighbor as visited and push to stack
+            randNeighbor.visited = true
+            seen.Push(randNeighbor)
+            // track the move
+            m.moves = append(m.moves, c.direction(randNeighbor))
+        }
     }
-
-    canvas.End()
-}
-
-func (m *Maze) Json() []byte {
-    data, err := json.Marshal(m)
-
-    if err != nil {
-        log.Panicln("ERROR: unable to marshal JSON")
-    }
-    
-    return data
 }
 
 func (m *Maze) cellAt(x int, y int) *Cell {
+    // return nil if index is invalid
     if x < 0 || y < 0 || x > m.cols - 1 || y > m.rows - 1 {
         return nil
     }
-    
     return m.cells[m.cols * y + x]
 }
 
-func (m *Maze) checkNeighbors(x int, y int, count int, seen *Stack) *Cell {
-    c := m.cellAt(x, y)
-    c.current = false
-
-    neighbors := []*Cell{ 
-        m.cellAt(x, y - 1),
-        m.cellAt(x + 1, y), 
-        m.cellAt(x, y + 1), 
-        m.cellAt(x - 1, y),
+func (m *Maze) unvisitedNeighbors(c *Cell) []*Cell {
+    // get all neighbors
+    neighbors := []*Cell {
+        m.cellAt(c.x, c.y - 1), // top
+        m.cellAt(c.x + 1, c.y), // right
+        m.cellAt(c.x, c.y + 1), // bottom
+        m.cellAt(c.x - 1, c.y), // left
     }
 
-    rand.Seed(time.Now().UnixNano())
-    random := rand.Intn(4)
-
-    for i := range neighbors {
-        randNeighbor := neighbors[(random + i) % 4]
-        if randNeighbor != nil && !randNeighbor.visited {
-            randNeighbor.visited = true
-            randNeighbor.current = true
-          
-            m.moves = append(m.moves, c.direction(randNeighbor))
-            c.removeWall(randNeighbor)
-            seen.Push(c)
-            m.checkNeighbors(randNeighbor.x, randNeighbor.y, count + 1, seen)
-            return randNeighbor
+    // return neighbors that have a valid index and aren't visited
+    unvisited := make([]*Cell, 0, 4)
+    for _, n := range neighbors {
+        if n != nil && !n.visited {
+            unvisited = append(unvisited, n)
         }
     }
-
-    if len(seen.cell) > 0 {
-        n, _ := seen.Pop()
-        m.moves = append(m.moves, c.direction(n))
-        n.current = true
-        m.checkNeighbors(n.x, n.y, count + 1, seen)
-    }
-
-    return nil
+    return unvisited
 }

@@ -25,7 +25,6 @@ func (s *Stack) Pop() (*Cell, error) {
     s.lock.Lock()
     defer s.lock.Unlock()
 
-
     l := len(s.cell)
     if l == 0 {
         return nil, errors.New("Empty Stack")
