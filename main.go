@@ -1,14 +1,35 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/LukeOrth/go-maze/maze"
-)
+import "github.com/LukeOrth/go-maze/server"
 
 func main() {
-    maze := maze.NewMaze(10, 10, 3)
-    data := maze.Json()
-    fmt.Printf("%s\n", data)
-    //server.Run()
+    /*
+    f, _ := os.Open("maze.json")
+    defer f.Close()
+    
+    s := bufio.NewScanner(f)
+    
+    var b []byte
+    for s.Scan() {
+        b = s.Bytes()
+    }
+
+    var m maze.Maze
+    err := json.Unmarshal(b, &m)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    fmt.Printf("%+v\n", m)
+    */
+
+    server.Run()
+    
+    /*
+    f, _ := os.Create("test.png")
+    defer f.Close()
+
+    maze := maze.NewMaze(10, 10, 5)
+    maze.Png(f)
+    */
 }

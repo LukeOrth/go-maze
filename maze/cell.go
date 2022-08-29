@@ -18,6 +18,17 @@ type Cell struct {
     current bool
 }
 
+func NewCell(x int, y int, border uint8) *Cell {
+    cell := &Cell {
+        x: x,
+        y: y,
+        border: border,
+        visited: false,
+        current: false,
+    }
+    return cell
+}
+
 func (c Cell) MarshalJSON() ([]byte, error) {
     return json.Marshal(c.border)
 }

@@ -2,7 +2,6 @@ package maze
 
 import (
 	"encoding/json"
-	"fmt"
 	"image"
 	"image/png"
 	"io"
@@ -32,10 +31,14 @@ func NewMaze(cols int, rows int, scale int) *Maze {
 }
 
 func (m *Maze) Png(w io.Writer) {
+    // dimensions
     width := m.cols * (2 * m.scale) + m.scale
     height := m.rows * (2 * m.scale) + m.scale
 
+    // setup image
     img := image.NewRGBA(image.Rect(0, 0, width, height))
+
+    // draw cells
     for _, c := range m.cells {
         c.DrawPNG(img, m.scale)
     }
@@ -43,13 +46,16 @@ func (m *Maze) Png(w io.Writer) {
 }
 
 func (m *Maze) Svg(w io.Writer) {
+    // dimensions
     width := m.cols * (m.scale + 1)
     height := m.rows * (m.scale + 1)
 
+    // setup canvas
     canvas := svg.New(w)
     canvas.Start(width, height)
     canvas.Rect(0, 0, width, height, canvas.RGB(255, 255, 255))
 
+    // draw cells
     for _, c := range m.cells {
         c.DrawSVG(canvas, m.scale) 
     }
@@ -57,7 +63,6 @@ func (m *Maze) Svg(w io.Writer) {
 }
 
 func (m *Maze) Json() []byte {
-    fmt.Println("made it here!")
     data, err := json.Marshal(m)
     if err != nil {
         log.Panicln("ERROR: unable to marshal JSON")
@@ -73,6 +78,34 @@ func (m Maze) MarshalJSON() ([]byte, error) {
         "moves":    m.moves,
         "scale":    m.scale,
     })
+}
+
+func (m *Maze) UnmarshalJSON(b []byte) error {
+    // temporary struct for capturing the received JSON data
+    temp := &struct {
+        Cells   []uint8 `json:"cells"`
+        Cols    int     `json:"columns"`
+        Rows    int     `json:"rows"`
+        Scale   int     `json:"scale"`
+    }{} 
+
+    if err := json.Unmarshal(b, &temp); err != nil {
+        return err
+    }
+
+    // initialize values
+    m.cells = make([]*Cell, temp.Cols * temp.Rows)
+    m.cols = temp.Cols
+    m.rows = temp.Rows
+    m.scale = temp.Scale
+
+    // create cells
+    for i, border := range temp.Cells {
+        x := i % temp.Cols
+        y := i / temp.Cols % temp.Rows
+        m.cells[i] = NewCell(x, y, border)
+    }
+    return nil
 }
 
 func (u moves) MarshalJSON() ([]byte, error) {
@@ -92,13 +125,7 @@ func initMaze(cols int, rows int, scale int) *Maze {
     // initalize cells
     for y := 0; y < rows; y++ {
         for x := 0; x < cols; x++ {
-            maze.cells[cols * y + x] = &Cell{
-                x: x, 
-                y: y, 
-                border: 15, 
-                visited: false, 
-                current: false,
-            }
+            maze.cells[cols * y + x] = NewCell(x, y, 15)
         }
     }
 
@@ -127,15 +154,19 @@ func (m *Maze) generateMaze(x int, y int, seen *Stack) {
         if len(neighbors) > 0 {
             // push cell to stack
             seen.Push(c)
+
             // get random unvisited neighbor
             rand.Seed(time.Now().UnixNano())
             random := rand.Intn(len(neighbors))
             randNeighbor := neighbors[(random) % len(neighbors)]
+
             // remove wall between cells
             c.removeWall(randNeighbor)
+
             // mark neighbor as visited and push to stack
             randNeighbor.visited = true
             seen.Push(randNeighbor)
+
             // track the move
             m.moves = append(m.moves, c.direction(randNeighbor))
         }
