@@ -1,11 +1,11 @@
 package server
 
 import (
-	"encoding/json"
+    "encoding/json"
     "errors"
-	"log"
-	"net/http"
-	"strconv"
+    "log"
+    "net/http"
+    "strconv"
 
 	"github.com/LukeOrth/go-maze/maze"
 	"github.com/gorilla/mux"
