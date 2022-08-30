@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+    "errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,27 +19,31 @@ func JSONError(w http.ResponseWriter, err interface{}, code int) {
     json.NewEncoder(w).Encode(err)
 }
 
-func validate(r *http.Request, params ...string) []string {
-    errs := []string{}
+func getParms(r *http.Request, params ...string) ([]interface{}, error) {
+    values := make([]interface{}, len(params))
+    var errString string
 
-    for _, param := range params {
-       if !r.URL.Query().Has(param) {
-           errs = append(errs, fmt.Sprintf("missing parameter: %s", param))
+    for _, p := range params {
+       if !r.URL.Query().Has(p) {
+           errString = errString + "missing parameter: %s"
        }
+       values = append(values, r.URL.Query().Get(p))
     }
-    return errs
+    if len(errString) > 0 {
+        return nil, errors.New(errString)
+    }
+    return values, nil
 }
 
 func generateMazeGET(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
-    q := r.URL.Query()
-    columns, _ := strconv.Atoi(q.Get("columns"))
-    rows, _ := strconv.Atoi(q.Get("rows"))
-    scale, _ := strconv.Atoi(q.Get("scale"))
-    //missingParams := make([]string, 3)
-    if q.Has("columns") {
-        fmt.Println("HI MOM")
+    params, err := getParms(r, "columns", "rows", "scale")
+    if err != nil {
+        JSONError(w, err, 400)
     }
+    columns, _ := strconv.Atoi(params[0].(string))
+    rows, _ := strconv.Atoi(params[1].(string))
+    scale, _ := strconv.Atoi(params[2].(string))
     if columns == 0 {
         JSONError(w, "missing parameter: columns", 400)
         return
