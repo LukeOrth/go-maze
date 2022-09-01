@@ -1,6 +1,10 @@
 version: "3"
 services:
-  web:
-    build: .
+  api:
+    build: ./src
     ports:
       - "8000:8000"
+  client:
+    build: ./src/client
+    ports:
+      - "7000:7000"

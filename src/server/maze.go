@@ -20,6 +20,7 @@ func JSONError(w http.ResponseWriter, err interface{}, code int) {
 
 func generateMazeGET(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.Header().Set("Access-Control-Allow-Origin", "http://localhost:7000")
     q := r.URL.Query()
     columns, _ := strconv.Atoi(q.Get("columns"))
     rows, _ := strconv.Atoi(q.Get("rows"))
