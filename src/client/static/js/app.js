@@ -10,10 +10,10 @@ generateMaze.addEventListener('click', () => {
     if(cols > 0 && cols < 1001 && rows > 0 && rows < 1001) {
         getMaze(cols, rows, scale)
         .then(data => {
-            console.log(data);
-        })
+            draw(data);
+        });
     } else {
-        console.log(cols, rows)
+        console.log(cols, rows);
         console.log("Bad inputs");
     }
 })
@@ -23,14 +23,4 @@ async function getMaze(cols, rows, scale) {
     const maze = await response.json();
 
     return maze
-}
-
-function drawMaze(cols, rows, cells) {
-    let maze = document.getElementById("maze");
-    let context = maze.getContext("2d")
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-            context.moveTo(
-        }
-    }
 }

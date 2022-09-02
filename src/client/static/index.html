@@ -5,7 +5,7 @@
     <meta name="description" content="A maze generator using the backtracking algorithm.  Mazes are built with Go, served via REST API, and visualized with JavaScript.">
     <meta name="application-name" content="Go-Maze">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="style.css">
     <title>Maze Generator</title>
 </head>
 <body>
@@ -18,9 +18,11 @@
             <input type="number" id="mazeRow" placeholder="0-1000">
             <input id="generateMaze" type="button" value="Generate">
         </form>
-        <canvas class="maze"></canvas>
+        <canvas id="maze-graphic"></canvas>
     </div>
 
-    <script src="app.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/graphics.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
