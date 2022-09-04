@@ -18,43 +18,47 @@ function setup() {
 } 
 
 const getBorders = {
-    1: function(x1, y1, x2, y2) {borders([[x1, y1], [x1, y2]])},
-    2: function(x1, y1, x2, y2) {borders([[x1, y2], [x2, y2]])},
-    3: function(x1, y1, x2, y2) {borders([[x1, y1], [x1, y2], [x2, y2]])},
-    4: function(x1, y1, x2, y2) {borders([[x2, y1], [x2, y2]])},
-    5: function(x1, y1, x2, y2) {
-        borders([[x1, y1], [x1, y2]]);
-        borders([[x2, y1], [x2, y2]]);
+    1: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x1, y2]]))},
+    2: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y2], [x2, y2]]))},
+    3: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x1, y2], [x2, y2]]))},
+    4: (s, x1, y1, x2, y2) => {s.add(borders([[x2, y1], [x2, y2]]))},
+    5: (s, x1, y1, x2, y2) => {
+        s.add(borders([[x1, y1], [x1, y2]]));
+        s.add(borders([[x2, y1], [x2, y2]]));
     },
-    6: function(x1, y1, x2, y2) {borders([[x1, y2], [x2, y2], [x2, y1]])},
-    7: function(x1, y1, x2, y2) {borders([[x1, y1], [x1, y2], [x2, y2], [x2, y1]])},
-    8: function(x1, y1, x2, y2) {borders([[x1, y1], [x2, y1]])},
-    9: function(x1, y1, x2, y2) {borders([[x1, y2], [x1, y1], [x2, y1]])},
-    10: function(x1, y1, x2, y2) {
-        borders([[x1, y1], [x2, y1]]);
-        borders([[x1, y2], [x2, y2]]);
+    6: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y2], [x2, y2], [x2, y1]]))},
+    7: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x1, y2], [x2, y2], [x2, y1]]))},
+    8: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x2, y1]]))},
+    9: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y2], [x1, y1], [x2, y1]]))},
+    10: (s, x1, y1, x2, y2) => {
+        s.add(borders([[x1, y1], [x2, y1]]));
+        s.add(borders([[x1, y2], [x2, y2]]));
     },
-    11: function(x1, y1, x2, y2) {borders([[x2, y1], [x1, y1], [x1, y2], [x2, y2]])},
-    12: function(x1, y1, x2, y2) {borders([[x1, y1], [x2, y1], [x2, y2]])},
-    13: function(x1, y1, x2, y2) {borders([[x1, y2], [x1, y1], [x2, y1], [x2, y2]])},
-    14: function(x1, y1, x2, y2) {borders([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])},
-    15: function(x1, y1, x2, y2) {borders([[x1, y1], [x2, y1], [x2, y2], [x1, y2], [x1, y1]])},
+    11: (s, x1, y1, x2, y2) => {s.add(borders([[x2, y1], [x1, y1], [x1, y2], [x2, y2]]))},
+    12: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x2, y1], [x2, y2]]))},
+    13: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y2], [x1, y1], [x2, y1], [x2, y2]]))},
+    14: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x2, y1], [x2, y2], [x1, y2]]))},
+    15: (s, x1, y1, x2, y2) => {s.add(borders([[x1, y1], [x2, y1], [x2, y2], [x1, y2], [x1, y1]]))},
 };
-
 
 function draw(maze) {
     let {scene, camera, renderer} = setup();
-
-    for (let i = 0; i < maze.cells.length; i++) {
-        drawCell = getBorders[maze.cells[i]];
-    }
-
+    
     // LOGIC
     const zeroX = -visibleWidthAtZDepth(0, camera) / 2;
     const zeroY = visibleHeightAtZDepth(0, camera) / 2;
 
-    let coordinates = [[zeroX, zeroY],[zeroX + 10, zeroY],[zeroX + 10, zeroY - 10]];
-    scene.add(borders(coordinates));
+    for (let i = 0; i < maze.cells.length; i++) {
+        console.log(maze.cells[i]);
+        drawCell = getBorders[maze.cells[i]];
+        //console.log(drawCell(zeroX, zeroY, zeroX + maze.scale, zeroY + maze.scale));
+    }
+
+    //let coordinates = [[zeroX, zeroY],[zeroX + 10, zeroY],[zeroX + 10, zeroY - 10]];
+    //scene.add(borders(coordinates));
+    
+    myFunc = getBorders[15];
+    myFunc(scene, 0, 0, 10, 10);
 
     renderer.render(scene, camera);
 }
