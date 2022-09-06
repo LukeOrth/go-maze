@@ -1,3 +1,7 @@
+// Init Graphic
+const graphic = new Graphic(document.getElementById("graphic"));
+graphic.setup();
+
 // Generate maze event listener
 const generateMaze = document.getElementById('generateMaze');
 
@@ -10,7 +14,7 @@ generateMaze.addEventListener('click', () => {
     if(cols > 0 && cols < 1001 && rows > 0 && rows < 1001) {
         getMaze(cols, rows, scale)
         .then(data => {
-            draw(data);
+            graphic.draw(data);
         });
     } else {
         console.log(cols, rows);
