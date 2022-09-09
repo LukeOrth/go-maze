@@ -12,12 +12,12 @@ generateMaze.addEventListener('click', () => {
     let scale = 10;
 
     if(cols > 0 && cols < 1001 && rows > 0 && rows < 1001) {
+        //graphic.drawGrid(cols, rows);
         getMaze(cols, rows, scale)
         .then(data => {
-            graphic.draw(data);
+            graphic.drawMaze(data);
         });
     } else {
-        console.log(cols, rows);
         console.log("Bad inputs");
     }
 })

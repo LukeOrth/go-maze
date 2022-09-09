@@ -14,9 +14,54 @@ class Graphic {
         this.width = -(this.visibleWidth() / 2);
         this.height = this.visibleHeight() / 2;
     }
-    
-    draw(maze) {
+
+    drawGrid(cols, rows) {
+        let scale = Math.min(Math.abs(this.width / cols), this.height / rows) * 2;
+        for (let i = 0; i < cols; i++) {
+            let x1 = this.width + i * scale;
+            let x2 = x1 + scale;
+            for (let j = 0; j < rows; j++) {
+                let y1 = this.height - j * scale;
+                let y2 = y1 - scale;
+
+                let cell = this.cellType[15];
+                this.scene.add(cell(x1, y1, x2, y2)[0]);
+            }
+        }
+    }
+
+    genMaze(maze) {
         let scale = Math.min(Math.abs(this.width / maze.columns), this.height / maze.rows) * 2;
+        let x1 = this.width;
+        let y1 = this.height;
+        let x2 = x1 + scale;
+        let y2 = y1 - scale;
+
+        const timer = ms => new Promise(res => setTimeout(res, ms))
+        
+        const load = async() => {
+            for (let i = 0; i < maze.moves.length; i++) {
+                const move = maze.moves[i];
+                let cell = this.cellType[move];
+                ({x1, y1, x2, y2} = this.updateXY[move](x1, y1, x2, y2, scale));
+                this.scene.add(cell(x1, y1, x2, y2)[0]);
+                this.renderer.render(this.scene, this.camera);
+                await timer(1000);
+            }
+        }
+        load();
+    }
+
+    updateXY = {
+        8: (x1, y1, x2, y2, scale) => {return {x1: x1, y1: y1 + scale, x2: x2, y2: y2 + scale}},
+        4: (x1, y1, x2, y2, scale) => {return {x1: x1 + scale, y1: y1, x2: x2 + scale, y2: y2}},
+        2: (x1, y1, x2, y2, scale) => {return {x1: x1, y1: y1 - scale, x2: x2, y2: y2 - scale}},
+        1: (x1, y1, x2, y2, scale) => {return {x1: x1 - scale, y1: y1, x2: x2 - scale, y2: y2}},
+    }
+    
+    drawMaze(maze) {
+        let scale = Math.min(Math.abs(this.width / maze.columns), this.height / maze.rows) * 2;
+
         for (let i = 0; i < maze.cells.length; i++) {
             if (maze.cells[i] == 0) {
                 continue;
@@ -26,9 +71,8 @@ class Graphic {
             let x2 = x1 + scale;
             let y2 = y1 - scale;
 
-            console.log(maze.cells[i], x1, y1, x2, y2, this.cellType[maze.cells[i]]);
             let lines = this.cellType[maze.cells[i]];
-            let results = lines(x1, y1, x1 + scale, y1 - scale);
+            let results = lines(x1, y1, x2, y2);
             for (let j = 0; j < results.length; j++) {
                 this.scene.add(results[j]);
             }
