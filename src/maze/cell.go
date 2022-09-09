@@ -30,7 +30,11 @@ func NewCell(x int, y int, border uint8) *Cell {
 }
 
 func (c Cell) MarshalJSON() ([]byte, error) {
-    return json.Marshal(c.border)
+    return json.Marshal(map[string]interface{}{
+        "border":   c.border,
+        "x":        c.x,
+        "y":        c.y,
+    })
 }
 
 func (c *Cell) DrawPNG(img *image.RGBA, scale int) {

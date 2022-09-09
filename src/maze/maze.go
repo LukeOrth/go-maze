@@ -13,13 +13,11 @@ import (
 	"github.com/ajstarks/svgo"
 )
 
-type moves []uint
-
 type Maze struct {
     cells   []*Cell
     cols    int
     rows    int
-    moves   []uint
+    moves   []*Cell
     scale   int
 }
 
@@ -108,17 +106,13 @@ func (m *Maze) UnmarshalJSON(b []byte) error {
     return nil
 }
 
-func (u moves) MarshalJSON() ([]byte, error) {
-    return json.Marshal(u)
-}
-
 func initMaze(cols int, rows int, scale int) *Maze {
     // instantiate maze
     maze := &Maze{ 
         cells: make([]*Cell, cols * rows), 
         cols: cols, 
         rows: rows, 
-        moves: make([]uint, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
+        moves: make([]*Cell, 0, int(math.Pow(float64(cols), 2) + math.Pow(float64(rows), 2))),
         scale: scale,
     }
 
@@ -168,7 +162,7 @@ func (m *Maze) generateMaze(x int, y int, seen *Stack) {
             seen.Push(randNeighbor)
 
             // track the move
-            m.moves = append(m.moves, c.direction(randNeighbor))
+            m.moves = append(m.moves, c)
         }
     }
 }

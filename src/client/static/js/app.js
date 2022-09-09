@@ -15,7 +15,8 @@ generateMaze.addEventListener('click', () => {
         //graphic.drawGrid(cols, rows);
         getMaze(cols, rows, scale)
         .then(data => {
-            graphic.drawMaze(data);
+            graphic.drawBorder(cols, rows);
+            graphic.genMaze(data);
         });
     } else {
         console.log("Bad inputs");
